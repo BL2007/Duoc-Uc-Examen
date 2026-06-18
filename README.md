@@ -1,2 +1,2 @@
-# Duoc-Uc-Examen
+# Duoc-Uc-calculadora 
 Primer Examen de programacion
