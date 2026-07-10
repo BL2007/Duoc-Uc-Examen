@@ -1,0 +1,249 @@
+
+planes = {
+    'F001': ['Plan Basico', 'mensual', 1, False, False, 'libre'],
+    'F002': ['Plan Full', 'mensual', 1, True, True, 'libre'],
+    'F003': ['Plan Estudiante', 'trimestral', 3, False, True, 'tarde'],
+    'F004': ['Plan Senior', 'trimestral', 3, True, False, 'mañana'],
+    'F005': ['Plan Anual Pro', 'anual', 12, True, True, 'libre'],
+    'F006': ['Plan Nocturno', 'mensual', 1, False, True, 'noche']
+}
+
+inscripciones = {
+    'F001': [14990, 30],
+    'F002': [22990, 10],
+    'F003': [39990, 0],
+    'F004': [35990, 6],
+    'F005': [159990, 2],
+    'F006': [18990, 15]
+}
+
+def leer_opcion():
+    try:
+        opcion = int(input("Ingrese opcion: "))
+        if 1 <= opcion <= 6:
+            return opcion
+        else:
+            print("Debe seleccionar una opcion valida")
+            return 0
+    except ValueError:
+        print("Debe seleccionar una opcion valida")
+        return 0
+
+def cupos_por_tipo(dicc_planes, dicc_inscripciones, tipo_buscar):
+    total_cupos = 0
+    for codigo, info in dicc_planes.items():
+        tipo_plan = info[1]
+        if tipo_plan.lower() == tipo_buscar.lower():
+            if codigo in dicc_inscripciones:
+                total_cupos += dicc_inscripciones[codigo][1]  
+    
+    print(f"El total de cupos disponibles es: {total_cupos}")
+
+def busqueda_precio(dicc_planes, dicc_inscripciones, p_min, p_max):
+    resultados = []
+    
+    for codigo, info_insc in dicc_inscripciones.items():
+        precio = info_insc[0]  
+        cupos = info_insc[1]  
+        
+        if p_min <= precio <= p_max and cupos > 0:
+            if codigo in dicc_planes:
+                nombre_plan = dicc_planes[codigo][0] 
+                resultados.append(f"{nombre_plan}-{codigo}")
+                
+    if len(resultados) > 0:
+        resultados.sort()
+        for elemento in resultados:
+            print(elemento)
+    else:
+        print("No hay planes en ese rango de precios.")
+
+def buscar_codigo(dicc_planes, codigo_buscar):
+    for codigo in dicc_planes.keys():
+        if codigo.lower() == codigo_buscar.lower():
+            return True
+    return False
+
+
+def actualizar_precio(dicc_inscripciones, codigo, nuevo_precio):
+    llave_real = None
+    for k in dicc_inscripciones.keys():
+        if k.lower() == codigo.lower():
+            llave_real = k
+            break
+            
+    if llave_real is not None:
+        dicc_inscripciones[llave_real][0] = nuevo_precio  
+        return True
+    return False
+
+def validar_codigo(dicc_planes, valor):
+    if valor.strip() == "":
+        return False
+    for k in dicc_planes.keys():
+        if k.lower() == valor.strip().lower():
+            return False
+    return True
+
+def validar_nombre(valor):
+    return valor.strip() != ""
+
+def validar_tipo(valor):
+    return valor.strip().lower() in ['mensual', 'trimestral', 'anual']
+
+def validar_duracion(valor):
+    try:
+        num = int(valor)
+        return num > 0
+    except ValueError:
+        return False
+
+def validar_piscina(valor):
+    return valor.strip().lower() in ['s', 'n']
+
+def validar_clases(valor):
+    return valor.strip().lower() in ['s', 'n']
+
+def validar_horario(valor):
+    return valor.strip() != ""
+
+def validar_precio(valor):
+    try:
+        num = int(valor)
+        return num > 0
+    except ValueError:
+        return False
+
+def validar_cupos(valor):
+    try:
+        num = int(valor)
+        return num >= 0
+    except ValueError:
+        return False
+
+def agregar_plan(dicc_planes, dicc_inscripciones, cod, nom, tipo, dur, piscina, clases, hor, prec, cup):
+    dicc_planes[cod] = [nom, tipo, dur, piscina, clases, hor]
+    dicc_inscripciones[cod] = [prec, cup]
+    return True
+
+def eliminar_plan(dicc_planes, dicc_inscripciones, codigo):
+    if buscar_codigo(dicc_planes, codigo):
+        llave_real = None
+        for k in dicc_planes.keys():
+            if k.lower() == codigo.lower():
+                llave_real = k
+                break
+        
+        if llave_real in dicc_planes:
+            del dicc_planes[llave_real]
+        if llave_real in dicc_inscripciones:
+            del dicc_inscripciones[llave_real]
+        return True
+    return False
+
+while True:
+    print("\n========== MENU PRINCIPAL ==========")
+    print("1. Cupos por tipo de plan")
+    print("2. Busqueda de planes por rango de precio")
+    print("3. Actualizar precio de plan")
+    print("4. Agregar plan")
+    print("5. Eliminar plan")
+    print("6. Salir")
+    print("====================================")
+    
+    opc = leer_opcion()
+    
+    if opc == 1:
+        tipo = input("Ingrese tipo de plan a consultar: ")
+        cupos_por_tipo(planes, inscripciones, tipo)
+        
+    elif opc == 2:
+        try:
+            p_min = int(input("Ingrese precio minimo: "))
+            p_max = int(input("Ingrese precio maximo: "))
+            busqueda_precio(planes, inscripciones, p_min, p_max)
+        except ValueError:
+            print("Debe ingresar valores enteros")
+            
+    elif opc == 3:
+        continuar_opc3 = "s"
+        while continuar_opc3.lower() == "s":
+            cod_act = input("Ingrese el codigo del plan: ")
+            try:
+                nuevo_p = int(input("Ingrese el nuevo precio: "))
+                if nuevo_p > 0:
+                    if actualizar_precio(inscripciones, cod_act, nuevo_p):
+                        print("Precio actualizado")
+                    else:
+                        print("El codigo no existe")
+                else:
+                    print("El precio debe ser mayor que cero")
+            except ValueError:
+                print("Debe ingresar un valor entero valido")
+                
+            continuar_opc3 = input("¿Desea actualizar otro precio (s/n)?: ")
+
+    elif opc == 4:
+        cod = input("Ingrese codigo: ")
+        if not validar_codigo(planes, cod):
+            print("Error en validación del campo o el codigo ya existe.")
+            continue
+            
+        nom = input("Ingrese nombre: ")
+        if not validar_nombre(nom):
+            print("Error en validacion de nombre.")
+            continue
+            
+        tipo_p = input("Ingrese tipo (mensual, trimestral, anual): ")
+        if not validar_tipo(tipo_p):
+            print("Error en validacion de tipo.")
+            continue
+            
+        dur = input("Ingrese duracion en meses: ")
+        if not validar_duracion(dur):
+            print("Error en validacion de duracion.")
+            continue
+        dur = int(dur)
+        
+        pisc = input("¿Incluye acceso a piscina? (s/n): ")
+        if not validar_piscina(pisc):
+            print("Error en validacion de acceso a piscina.")
+            continue
+        pisc_bool = True if pisc.lower() == 's' else False
+        
+        clas = input("¿Incluye clases grupales? (s/n): ")
+        if not validar_clases(clas):
+            print("Error en validacion de clases grupales.")
+            continue
+        clas_bool = True if clas.lower() == 's' else False
+        
+        hor = input("Ingrese franja horaria: ")
+        if not validar_horario(hor):
+            print("Error en validacion de horario.")
+            continue
+            
+        prec = input("Ingrese precio mensual: ")
+        if not validar_precio(prec):
+            print("Error en validacion de precio.")
+            continue
+        prec = int(prec)
+        
+        cup = input("Ingrese cantidad de cupos: ")
+        if not validar_cupos(cup):
+            print("Error en validacion de cupos.")
+            continue
+        cup = int(cup)
+        
+        if agregar_plan(planes, inscripciones, cod, nom, tipo_p, dur, pisc_bool, clas_bool, hor, prec, cup):
+            print("Plan agregado")
+
+    elif opc == 5:
+        cod_elim = input("Ingrese codigo del plan a eliminar: ")
+        if eliminar_plan(planes, inscripciones, cod_elim):
+            print("Plan eliminado")
+        else:
+            print("El codigo no existe")
+            
+    elif opc == 6:
+        print("Programa finalizado.")
+        break
